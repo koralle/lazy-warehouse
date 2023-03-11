@@ -1,0 +1,15 @@
+services:
+  app:
+    image: lazy_warehouse_backend_prototype
+    build:
+      context: .
+      dockerfile: ./dockerfiles/app/Dockerfile
+      args:
+        - target=dev
+    environment:
+      TODO_ENV: dev
+      PORT: 8080
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
