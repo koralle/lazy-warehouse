@@ -1,0 +1,51 @@
+scalar DateTimeWithTimeZone
+scalar UUIDv7
+scalar Email
+scalar URI
+
+interface ModelBase {
+  id: UUIDv7!
+  _created_at: DateTimeWithTimeZone!
+  _updated_at: DateTimeWithTimeZone!
+}
+
+enum RoleCategory {
+  OWNER
+  EDITOR
+  READER
+  NONE
+}
+
+type Role implements ModelBase {
+  id: UUIDv7!
+  name: RoleCategory!
+  _created_at: DateTimeWithTimeZone!
+  _updated_at: DateTimeWithTimeZone!
+}
+
+type User implements ModelBase {
+  id: UUIDv7!
+  email: Email!
+  name: String!
+  profile_image_url: URI
+  _created_at: DateTimeWithTimeZone!
+  _updated_at: DateTimeWithTimeZone!
+}
+
+type Group implements ModelBase {
+  id: UUIDv7!
+  name: String!
+  description: String
+  profile_image_url: URI
+  _created_at: DateTimeWithTimeZone!
+  _updated_at: DateTimeWithTimeZone!
+}
+
+# type Administration implements ModelBase {
+#   id: UUIDv7!
+#   user_id: UUIDv7!
+#   group_id: UUIDv7!
+#   role_id: UUIDv7!
+#   _created_at: DateTimeWithTimeZone!
+#   _updated_at: DateTimeWithTimeZone!
+# }
