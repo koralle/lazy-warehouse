@@ -12,6 +12,7 @@ import (
 
 	"github.com/koralle/lazy-warehouse/backend/config"
 	"github.com/koralle/lazy-warehouse/backend/graph"
+	"github.com/koralle/lazy-warehouse/backend/internal"
 )
 
 func NewMux(config *config.Config) (http.Handler, func(), error) {
@@ -22,7 +23,7 @@ func NewMux(config *config.Config) (http.Handler, func(), error) {
 		_, _ = w.Write([]byte(`{"status": "ok"}`))
 	})
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.NewDefaultServer(internal.NewExecutableSchema(internal.Config{Resolvers: &graph.Resolver{}}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.POST{})

@@ -2,19 +2,100 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
+type ModelBase interface {
+	IsModelBase()
+	GetID() string
+	GetCreatedAt() string
+	GetUpdatedAt() string
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type Group struct {
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	Description     *string `json:"description"`
+	ProfileImageURL *string `json:"profile_image_url"`
+	CreatedAt       string  `json:"_created_at"`
+	UpdatedAt       string  `json:"_updated_at"`
 }
+
+func (Group) IsModelBase()              {}
+func (this Group) GetID() string        { return this.ID }
+func (this Group) GetCreatedAt() string { return this.CreatedAt }
+func (this Group) GetUpdatedAt() string { return this.UpdatedAt }
+
+type Role struct {
+	ID        string       `json:"id"`
+	Name      RoleCategory `json:"name"`
+	CreatedAt string       `json:"_created_at"`
+	UpdatedAt string       `json:"_updated_at"`
+}
+
+func (Role) IsModelBase()              {}
+func (this Role) GetID() string        { return this.ID }
+func (this Role) GetCreatedAt() string { return this.CreatedAt }
+func (this Role) GetUpdatedAt() string { return this.UpdatedAt }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID              string  `json:"id"`
+	Email           string  `json:"email"`
+	Name            string  `json:"name"`
+	ProfileImageURL *string `json:"profile_image_url"`
+	CreatedAt       string  `json:"_created_at"`
+	UpdatedAt       string  `json:"_updated_at"`
+}
+
+func (User) IsModelBase()              {}
+func (this User) GetID() string        { return this.ID }
+func (this User) GetCreatedAt() string { return this.CreatedAt }
+func (this User) GetUpdatedAt() string { return this.UpdatedAt }
+
+type RoleCategory string
+
+const (
+	RoleCategoryOwner  RoleCategory = "OWNER"
+	RoleCategoryEditor RoleCategory = "EDITOR"
+	RoleCategoryReader RoleCategory = "READER"
+	RoleCategoryNone   RoleCategory = "NONE"
+)
+
+var AllRoleCategory = []RoleCategory{
+	RoleCategoryOwner,
+	RoleCategoryEditor,
+	RoleCategoryReader,
+	RoleCategoryNone,
+}
+
+func (e RoleCategory) IsValid() bool {
+	switch e {
+	case RoleCategoryOwner, RoleCategoryEditor, RoleCategoryReader, RoleCategoryNone:
+		return true
+	}
+	return false
+}
+
+func (e RoleCategory) String() string {
+	return string(e)
+}
+
+func (e *RoleCategory) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RoleCategory(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RoleCategory", str)
+	}
+	return nil
+}
+
+func (e RoleCategory) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
