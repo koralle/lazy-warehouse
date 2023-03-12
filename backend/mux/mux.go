@@ -48,5 +48,4 @@ func NewMux(ctx context.Context, config *config.Config) (http.Handler, func(), e
 	}
 
 	return mux, func() { fmt.Println("Clean up.") }, nil
-
 }
