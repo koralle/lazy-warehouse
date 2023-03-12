@@ -16,6 +16,11 @@ func (r *queryResolver) GetAllAvailableRoles(ctx context.Context) ([]*model.Role
 	return r.Srv.GetAllAvailableRole(ctx)
 }
 
+// Group is the resolver for the group field.
+func (r *queryResolver) Group(ctx context.Context, id string) (*model.Group, error) {
+	return r.Srv.Group(ctx, id)
+}
+
 // Query returns internal.QueryResolver implementation.
 func (r *Resolver) Query() internal.QueryResolver { return &queryResolver{r} }
 
