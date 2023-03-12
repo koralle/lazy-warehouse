@@ -1,6 +1,6 @@
 services:
   app:
-    image: lazy_warehouse_backend_prototype
+    container_name: server
     build:
       context: .
       dockerfile: ./dockerfiles/app/Dockerfile
