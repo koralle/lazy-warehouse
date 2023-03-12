@@ -1,12 +1,12 @@
-scalar DateTimeWithTimeZone
-scalar UUIDv7
+scalar DateTime
+scalar UUID
 scalar Email
 scalar URI
 
 interface ModelBase {
-  id: UUIDv7!
-  _created_at: DateTimeWithTimeZone!
-  _updated_at: DateTimeWithTimeZone!
+  id: UUID!
+  _created_at: DateTime!
+  _updated_at: DateTime!
 }
 
 enum RoleCategory {
@@ -17,38 +17,29 @@ enum RoleCategory {
 }
 
 type Role implements ModelBase {
-  id: UUIDv7!
+  id: UUID!
   name: RoleCategory!
-  _created_at: DateTimeWithTimeZone!
-  _updated_at: DateTimeWithTimeZone!
+  _created_at: DateTime!
+  _updated_at: DateTime!
 }
 
 type User implements ModelBase {
-  id: UUIDv7!
+  id: UUID!
   email: Email!
   name: String!
   profile_image_url: URI
-  _created_at: DateTimeWithTimeZone!
-  _updated_at: DateTimeWithTimeZone!
+  _created_at: DateTime!
+  _updated_at: DateTime!
 }
 
 type Group implements ModelBase {
-  id: UUIDv7!
+  id: UUID!
   name: String!
   description: String
   profile_image_url: URI
-  _created_at: DateTimeWithTimeZone!
-  _updated_at: DateTimeWithTimeZone!
+  _created_at: DateTime!
+  _updated_at: DateTime!
 }
-
-# type Administration implements ModelBase {
-#   id: UUIDv7!
-#   user_id: UUIDv7!
-#   group_id: UUIDv7!
-#   role_id: UUIDv7!
-#   _created_at: DateTimeWithTimeZone!
-#   _updated_at: DateTimeWithTimeZone!
-# }
 
 type Query {
   getAllAvailableRoles: [Role]!

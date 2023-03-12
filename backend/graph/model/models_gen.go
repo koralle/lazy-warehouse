@@ -6,54 +6,55 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 type ModelBase interface {
 	IsModelBase()
 	GetID() string
-	GetCreatedAt() string
-	GetUpdatedAt() string
+	GetCreatedAt() time.Time
+	GetUpdatedAt() time.Time
 }
 
 type Group struct {
-	ID              string  `json:"id"`
-	Name            string  `json:"name"`
-	Description     *string `json:"description"`
-	ProfileImageURL *string `json:"profile_image_url"`
-	CreatedAt       string  `json:"_created_at"`
-	UpdatedAt       string  `json:"_updated_at"`
+	ID              string    `json:"id"`
+	Name            string    `json:"name"`
+	Description     *string   `json:"description"`
+	ProfileImageURL *string   `json:"profile_image_url"`
+	CreatedAt       time.Time `json:"_created_at"`
+	UpdatedAt       time.Time `json:"_updated_at"`
 }
 
-func (Group) IsModelBase()              {}
-func (this Group) GetID() string        { return this.ID }
-func (this Group) GetCreatedAt() string { return this.CreatedAt }
-func (this Group) GetUpdatedAt() string { return this.UpdatedAt }
+func (Group) IsModelBase()                 {}
+func (this Group) GetID() string           { return this.ID }
+func (this Group) GetCreatedAt() time.Time { return this.CreatedAt }
+func (this Group) GetUpdatedAt() time.Time { return this.UpdatedAt }
 
 type Role struct {
 	ID        string       `json:"id"`
 	Name      RoleCategory `json:"name"`
-	CreatedAt string       `json:"_created_at"`
-	UpdatedAt string       `json:"_updated_at"`
+	CreatedAt time.Time    `json:"_created_at"`
+	UpdatedAt time.Time    `json:"_updated_at"`
 }
 
-func (Role) IsModelBase()              {}
-func (this Role) GetID() string        { return this.ID }
-func (this Role) GetCreatedAt() string { return this.CreatedAt }
-func (this Role) GetUpdatedAt() string { return this.UpdatedAt }
+func (Role) IsModelBase()                 {}
+func (this Role) GetID() string           { return this.ID }
+func (this Role) GetCreatedAt() time.Time { return this.CreatedAt }
+func (this Role) GetUpdatedAt() time.Time { return this.UpdatedAt }
 
 type User struct {
-	ID              string  `json:"id"`
-	Email           string  `json:"email"`
-	Name            string  `json:"name"`
-	ProfileImageURL *string `json:"profile_image_url"`
-	CreatedAt       string  `json:"_created_at"`
-	UpdatedAt       string  `json:"_updated_at"`
+	ID              string    `json:"id"`
+	Email           string    `json:"email"`
+	Name            string    `json:"name"`
+	ProfileImageURL *string   `json:"profile_image_url"`
+	CreatedAt       time.Time `json:"_created_at"`
+	UpdatedAt       time.Time `json:"_updated_at"`
 }
 
-func (User) IsModelBase()              {}
-func (this User) GetID() string        { return this.ID }
-func (this User) GetCreatedAt() string { return this.CreatedAt }
-func (this User) GetUpdatedAt() string { return this.UpdatedAt }
+func (User) IsModelBase()                 {}
+func (this User) GetID() string           { return this.ID }
+func (this User) GetCreatedAt() time.Time { return this.CreatedAt }
+func (this User) GetUpdatedAt() time.Time { return this.UpdatedAt }
 
 type RoleCategory string
 
