@@ -44,4 +44,5 @@ type Group implements ModelBase {
 type Query {
   getAllAvailableRoles: [Role]!
   group(id: UUID!): Group!
+  user(id: UUID!): User!
 }
