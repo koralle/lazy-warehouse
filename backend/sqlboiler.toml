@@ -1,0 +1,14 @@
+pkgname  = "db"
+output   = "graph/db"
+wipe     = true
+no-tests = true
+add-global-variants = false
+
+[psql]
+  dbname = "lazy_warehouse"
+  schema = "lazy_warehouse"
+  host   = "localhost"
+  port   = 5432
+  user   = "dev_root"
+  pass   = "secret"
+  sslmode = "disable"
