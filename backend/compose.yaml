@@ -9,6 +9,17 @@ services:
     environment:
       ENV: dev
       PORT: 8080
+      DB_USER: dev_root
+      DB_PASSWORD: secret
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DBNAME: lazy_warehouse
+      SEARCH_PATH: lazy_warehouse
+      SSL_MODE: disable
+    depends_on:
+      - postgres
+    networks:
+      - app
     volumes:
       - .:/app
     ports:
@@ -35,3 +46,10 @@ services:
     volumes:
       - ./dockerfiles/postgresql/data:/var/lib/postgresql/data
       - ./dockerfiles/postgresql/script:/docker-entrypoint-initdb.d
+
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge
