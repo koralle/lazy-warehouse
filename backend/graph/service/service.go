@@ -10,11 +10,13 @@ import (
 type Services interface {
 	RoleService
 	GroupService
+	UserService
 }
 
 type services struct {
 	*roleService
 	*groupService
+	*userService
 }
 
 type RoleService interface {
@@ -25,9 +27,14 @@ type GroupService interface {
 	Group(ctx context.Context, id string) (*model.Group, error)
 }
 
+type UserService interface {
+	User(ctx context.Context, id string) (*model.User, error)
+}
+
 func New(exec boil.ContextExecutor) Services {
 	return &services{
 		roleService:  &roleService{exec: exec},
 		groupService: &groupService{exec: exec},
+		userService:  &userService{exec: exec},
 	}
 }

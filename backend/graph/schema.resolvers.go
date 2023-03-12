@@ -21,6 +21,11 @@ func (r *queryResolver) Group(ctx context.Context, id string) (*model.Group, err
 	return r.Srv.Group(ctx, id)
 }
 
+// Group is the resolver for the group field.
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	return r.Srv.User(ctx, id)
+}
+
 // Query returns internal.QueryResolver implementation.
 func (r *Resolver) Query() internal.QueryResolver { return &queryResolver{r} }
 

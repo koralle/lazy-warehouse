@@ -6,7 +6,9 @@ package db
 var TableNames = struct {
 	Groups string
 	Roles  string
+	Users  string
 }{
 	Groups: "groups",
 	Roles:  "roles",
+	Users:  "users",
 }
