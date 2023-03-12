@@ -6,26 +6,17 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
+	"github.com/koralle/lazy-warehouse/backend/internal"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+// GetAllAvailableRoles is the resolver for the getAllAvailableRoles field.
+func (r *queryResolver) GetAllAvailableRoles(ctx context.Context) ([]*model.Role, error) {
+	return r.Srv.GetAllAvailableRole(ctx)
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
-}
+// Query returns internal.QueryResolver implementation.
+func (r *Resolver) Query() internal.QueryResolver { return &queryResolver{r} }
 
-// Mutation returns MutationResolver implementation.
-func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
-
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

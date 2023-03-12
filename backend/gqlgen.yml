@@ -1,11 +1,11 @@
 # Where are all the schema files located? globs are supported eg  src/**/*.graphqls
 schema:
-  - graph/*.graphqls
+  - ./*.graphqls
 
 # Where should the generated server code go?
 exec:
-  filename: graph/generated.go
-  package: graph
+  filename: internal/generated.go
+  package: internal
 
 # Uncomment to enable federation
 # federation:
@@ -61,3 +61,6 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  DateTime:
+    model:
+      - github.com/99designs/gqlgen/graphql.Time

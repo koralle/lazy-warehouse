@@ -1,0 +1,46 @@
+scalar DateTime
+scalar UUID
+scalar Email
+scalar URI
+
+interface ModelBase {
+  id: UUID!
+  _created_at: DateTime!
+  _updated_at: DateTime!
+}
+
+enum RoleCategory {
+  OWNER
+  EDITOR
+  READER
+  NONE
+}
+
+type Role implements ModelBase {
+  id: UUID!
+  name: RoleCategory!
+  _created_at: DateTime!
+  _updated_at: DateTime!
+}
+
+type User implements ModelBase {
+  id: UUID!
+  email: Email!
+  name: String!
+  profile_image_url: URI
+  _created_at: DateTime!
+  _updated_at: DateTime!
+}
+
+type Group implements ModelBase {
+  id: UUID!
+  name: String!
+  description: String
+  profile_image_url: URI
+  _created_at: DateTime!
+  _updated_at: DateTime!
+}
+
+type Query {
+  getAllAvailableRoles: [Role]!
+}

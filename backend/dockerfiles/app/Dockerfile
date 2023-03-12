@@ -1,4 +1,4 @@
-FROM golang:1.19.6-bullseye as deploy-builder
+FROM golang:1.19.7-bullseye as deploy-builder
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ CMD ["./app"]
 
 # -------
 
-FROM golang:1.19.6-bullseye as dev
+FROM golang:1.19.7-bullseye as dev
 
 WORKDIR /app
 

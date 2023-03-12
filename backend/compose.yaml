@@ -1,15 +1,55 @@
 services:
   app:
-    image: lazy_warehouse_backend_prototype
+    container_name: server
     build:
       context: .
       dockerfile: ./dockerfiles/app/Dockerfile
       args:
         - target=dev
     environment:
-      TODO_ENV: dev
+      ENV: dev
       PORT: 8080
+      DB_USER: dev_root
+      DB_PASSWORD: secret
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DBNAME: lazy_warehouse
+      SEARCH_PATH: lazy_warehouse
+      SSL_MODE: disable
+    depends_on:
+      - postgres
+    networks:
+      - app
     volumes:
       - .:/app
     ports:
       - "8080:8080"
+
+  postgres:
+    container_name: postgres
+    build:
+      context: .
+      dockerfile: ./dockerfiles/postgresql/Dockerfile
+      args:
+        - DB_LANG=ja_JP
+    
+    ports:
+      - 5432:5432
+
+    environment:
+      - POSTGRES_USER=dev_root
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=postgres
+      - TZ=Asia/tokyo
+    restart: always
+
+    volumes:
+      - ./dockerfiles/postgresql/data:/var/lib/postgresql/data
+      - ./dockerfiles/postgresql/script:/docker-entrypoint-initdb.d
+
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge
