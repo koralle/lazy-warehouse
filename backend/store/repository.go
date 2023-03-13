@@ -14,11 +14,12 @@ import (
 func New(ctx context.Context, cfg *config.Config) (*sql.DB, func(), error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%d user=%s "+
-			"password=%s dbname=%s sslmode=%s",
+			"password=%s dbname=%s sslmode=%s search_path=%s",
 		cfg.DBHost, cfg.DBPort,
 		cfg.DBUser, cfg.DBPassword,
 		cfg.DBName,
 		cfg.SSLMode,
+		cfg.SearchPath,
 	)
 	log.Println(dsn)
 	db, err := sql.Open("postgres", dsn)

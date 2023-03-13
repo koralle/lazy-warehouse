@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 type Services interface {
@@ -31,10 +31,10 @@ type UserService interface {
 	User(ctx context.Context, id string) (*model.User, error)
 }
 
-func New(exec boil.ContextExecutor) Services {
+func New(db *sql.DB) Services {
 	return &services{
-		roleService:  &roleService{exec: exec},
-		groupService: &groupService{exec: exec},
-		userService:  &userService{exec: exec},
+		roleService:  &roleService{db: db},
+		groupService: &groupService{db: db},
+		userService:  &userService{db: db},
 	}
 }

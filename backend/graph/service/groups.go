@@ -2,33 +2,22 @@ package service
 
 import (
 	"context"
+	"database/sql"
 
-	"github.com/koralle/lazy-warehouse/backend/graph/db"
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type groupService struct {
-	exec boil.ContextExecutor
-}
-
-func convertGroup(group *db.Group) *model.Group {
-	return &model.Group{
-		ID:   group.ID,
-		Name: group.Name,
-	}
+	db *sql.DB
 }
 
 func (r *groupService) Group(ctx context.Context, id string) (*model.Group, error) {
-	group, err := db.Groups(
-		qm.Select(db.GroupColumns.ID, db.GroupColumns.Name),
-		db.GroupWhere.ID.EQ(id),
-	).One(ctx, r.exec)
+	row := r.db.QueryRowContext(ctx, `SELECT id, name, description FROM lazy_warehouse.groups WHERE id =  $1;`, id)
 
-	if err != nil {
+	var group model.Group
+	if err := row.Scan(&group.ID, &group.Name, &group.Description); err != nil {
 		return nil, err
 	}
 
-	return convertGroup(group), nil
+	return &group, nil
 }
