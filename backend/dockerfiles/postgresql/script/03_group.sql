@@ -1,4 +1,4 @@
-c postgres;
+\c lazy_warehouse;
 
 CREATE TABLE lazy_warehouse.groups (
     id VARCHAR(255),
