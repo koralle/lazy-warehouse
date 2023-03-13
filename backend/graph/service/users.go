@@ -3,32 +3,21 @@ package service
 import (
 	"context"
 
-	"github.com/koralle/lazy-warehouse/backend/graph/db"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type userService struct {
-	exec boil.ContextExecutor
-}
-
-func convertUser(group *db.User) *model.User {
-	return &model.User{
-		ID:   group.ID,
-		Name: group.Name,
-	}
+	pool *pgxpool.Pool
 }
 
 func (r *userService) User(ctx context.Context, id string) (*model.User, error) {
-	user, err := db.Users(
-		qm.Select(db.UserColumns.ID, db.UserColumns.Name),
-		db.UserWhere.ID.EQ(id),
-	).One(ctx, r.exec)
+	row := r.pool.QueryRow(ctx, `SELECT id, name, email FROM users WHERE id = $1;`, id)
 
-	if err != nil {
+	var user model.User
+	if err := row.Scan(&user.ID, &user.Name, &user.Email); err != nil {
 		return nil, err
 	}
 
-	return convertUser(user), nil
+	return &user, nil
 }

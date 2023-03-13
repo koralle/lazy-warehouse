@@ -3,33 +3,35 @@ package service
 import (
 	"context"
 
-	"github.com/koralle/lazy-warehouse/backend/graph/db"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type roleService struct {
-	exec boil.ContextExecutor
-}
-
-func convertRole(role *db.Role) *model.Role {
-	return &model.Role{
-		ID:   role.ID,
-		Name: model.RoleCategory(role.Name),
-	}
+	pool *pgxpool.Pool
 }
 
 func (r *roleService) GetAllAvailableRole(ctx context.Context) ([]*model.Role, error) {
-	roles, err := db.Roles(qm.Select(db.RoleColumns.ID, db.RoleColumns.Name)).All(ctx, r.exec)
+	rows, err := r.pool.Query(ctx, `SELECT id, name FROM lazy_warehouse.roles;`)
+
 	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
 	var res []*model.Role
 
-	for idx := 0; idx < len(roles); idx++ {
-		res = append(res, convertRole(roles[idx]))
+	for rows.Next() {
+		var role model.Role
+		if err := rows.Scan(&role.ID, &role.Name); err != nil {
+			return nil, err
+		}
+		res = append(res, &role)
 	}
 
 	return res, nil

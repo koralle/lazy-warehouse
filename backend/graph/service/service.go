@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 type Services interface {
@@ -31,10 +31,10 @@ type UserService interface {
 	User(ctx context.Context, id string) (*model.User, error)
 }
 
-func New(exec boil.ContextExecutor) Services {
+func New(pool *pgxpool.Pool) Services {
 	return &services{
-		roleService:  &roleService{exec: exec},
-		groupService: &groupService{exec: exec},
-		userService:  &userService{exec: exec},
+		roleService:  &roleService{pool: pool},
+		groupService: &groupService{pool: pool},
+		userService:  &userService{pool: pool},
 	}
 }

@@ -3,32 +3,21 @@ package service
 import (
 	"context"
 
-	"github.com/koralle/lazy-warehouse/backend/graph/db"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type groupService struct {
-	exec boil.ContextExecutor
-}
-
-func convertGroup(group *db.Group) *model.Group {
-	return &model.Group{
-		ID:   group.ID,
-		Name: group.Name,
-	}
+	pool *pgxpool.Pool
 }
 
 func (r *groupService) Group(ctx context.Context, id string) (*model.Group, error) {
-	group, err := db.Groups(
-		qm.Select(db.GroupColumns.ID, db.GroupColumns.Name),
-		db.GroupWhere.ID.EQ(id),
-	).One(ctx, r.exec)
+	row := r.pool.QueryRow(ctx, `SELECT id, name, description FROM groups WHERE id = $1;`, id)
 
-	if err != nil {
+	var group model.Group
+	if err := row.Scan(&group.ID, &group.Name, &group.Description); err != nil {
 		return nil, err
 	}
 
-	return convertGroup(group), nil
+	return &group, nil
 }
