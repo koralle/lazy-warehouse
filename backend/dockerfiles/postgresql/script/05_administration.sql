@@ -8,6 +8,6 @@ CREATE TABLE lazy_warehouse.administration (
     _created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     _updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    CONSTRAINT administration_unit UNIQUE NULLS NOT DISTINCT (user_id, group_id, role_id) 
+    CONSTRAINT user_and_group UNIQUE NULLS NOT DISTINCT (user_id, group_id) 
 );
 

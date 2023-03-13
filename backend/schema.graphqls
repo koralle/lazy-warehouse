@@ -46,3 +46,19 @@ type Query {
   group(id: UUID!): Group!
   user(id: UUID!): User!
 }
+
+type Mutation {
+  setRoleToUserInGroup(input: setRoleInput!): setRoleResult!
+}
+
+input setRoleInput {
+  user_id: UUID!
+  group_id: UUID!
+  role: RoleCategory!
+}
+
+type setRoleResult {
+  user: User!
+  group: Group!
+  role: RoleCategory!
+}

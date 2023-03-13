@@ -37,6 +37,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -51,6 +52,10 @@ type ComplexityRoot struct {
 		Name            func(childComplexity int) int
 		ProfileImageURL func(childComplexity int) int
 		UpdatedAt       func(childComplexity int) int
+	}
+
+	Mutation struct {
+		SetRoleToUserInGroup func(childComplexity int, input model.SetRoleInput) int
 	}
 
 	Query struct {
@@ -74,8 +79,17 @@ type ComplexityRoot struct {
 		ProfileImageURL func(childComplexity int) int
 		UpdatedAt       func(childComplexity int) int
 	}
+
+	SetRoleResult struct {
+		Group func(childComplexity int) int
+		Role  func(childComplexity int) int
+		User  func(childComplexity int) int
+	}
 }
 
+type MutationResolver interface {
+	SetRoleToUserInGroup(ctx context.Context, input model.SetRoleInput) (*model.SetRoleResult, error)
+}
 type QueryResolver interface {
 	GetAllAvailableRoles(ctx context.Context) ([]*model.Role, error)
 	Group(ctx context.Context, id string) (*model.Group, error)
@@ -138,6 +152,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Group.UpdatedAt(childComplexity), true
+
+	case "Mutation.setRoleToUserInGroup":
+		if e.complexity.Mutation.SetRoleToUserInGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setRoleToUserInGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetRoleToUserInGroup(childComplexity, args["input"].(model.SetRoleInput)), true
 
 	case "Query.getAllAvailableRoles":
 		if e.complexity.Query.GetAllAvailableRoles == nil {
@@ -240,6 +266,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.UpdatedAt(childComplexity), true
 
+	case "setRoleResult.group":
+		if e.complexity.SetRoleResult.Group == nil {
+			break
+		}
+
+		return e.complexity.SetRoleResult.Group(childComplexity), true
+
+	case "setRoleResult.role":
+		if e.complexity.SetRoleResult.Role == nil {
+			break
+		}
+
+		return e.complexity.SetRoleResult.Role(childComplexity), true
+
+	case "setRoleResult.user":
+		if e.complexity.SetRoleResult.User == nil {
+			break
+		}
+
+		return e.complexity.SetRoleResult.User(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -247,7 +294,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputsetRoleInput,
+	)
 	first := true
 
 	switch rc.Operation.Operation {
@@ -259,6 +308,21 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._Query(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -340,6 +404,22 @@ type Query {
   group(id: UUID!): Group!
   user(id: UUID!): User!
 }
+
+type Mutation {
+  setRoleToUserInGroup(input: setRoleInput!): setRoleResult!
+}
+
+input setRoleInput {
+  user_id: UUID!
+  group_id: UUID!
+  role: RoleCategory!
+}
+
+type setRoleResult {
+  user: User!
+  group: Group!
+  role: RoleCategory!
+}
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -347,6 +427,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_setRoleToUserInGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SetRoleInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNsetRoleInput2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐSetRoleInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -685,6 +780,69 @@ func (ec *executionContext) fieldContext_Group__updated_at(ctx context.Context, 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type DateTime does not have child fields")
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_setRoleToUserInGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_setRoleToUserInGroup(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetRoleToUserInGroup(rctx, fc.Args["input"].(model.SetRoleInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SetRoleResult)
+	fc.Result = res
+	return ec.marshalNsetRoleResult2ᚖgithubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐSetRoleResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_setRoleToUserInGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_setRoleResult_user(ctx, field)
+			case "group":
+				return ec.fieldContext_setRoleResult_group(ctx, field)
+			case "role":
+				return ec.fieldContext_setRoleResult_role(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type setRoleResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_setRoleToUserInGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -3216,9 +3374,213 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _setRoleResult_user(ctx context.Context, field graphql.CollectedField, obj *model.SetRoleResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_setRoleResult_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_setRoleResult_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "setRoleResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "profile_image_url":
+				return ec.fieldContext_User_profile_image_url(ctx, field)
+			case "_created_at":
+				return ec.fieldContext_User__created_at(ctx, field)
+			case "_updated_at":
+				return ec.fieldContext_User__updated_at(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _setRoleResult_group(ctx context.Context, field graphql.CollectedField, obj *model.SetRoleResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_setRoleResult_group(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Group, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Group)
+	fc.Result = res
+	return ec.marshalNGroup2ᚖgithubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_setRoleResult_group(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "setRoleResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Group_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Group_name(ctx, field)
+			case "description":
+				return ec.fieldContext_Group_description(ctx, field)
+			case "profile_image_url":
+				return ec.fieldContext_Group_profile_image_url(ctx, field)
+			case "_created_at":
+				return ec.fieldContext_Group__created_at(ctx, field)
+			case "_updated_at":
+				return ec.fieldContext_Group__updated_at(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _setRoleResult_role(ctx context.Context, field graphql.CollectedField, obj *model.SetRoleResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_setRoleResult_role(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Role, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.RoleCategory)
+	fc.Result = res
+	return ec.marshalNRoleCategory2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐRoleCategory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_setRoleResult_role(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "setRoleResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type RoleCategory does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
+
+func (ec *executionContext) unmarshalInputsetRoleInput(ctx context.Context, obj interface{}) (model.SetRoleInput, error) {
+	var it model.SetRoleInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"user_id", "group_id", "role"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "user_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+			it.UserID, err = ec.unmarshalNUUID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "group_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("group_id"))
+			it.GroupID, err = ec.unmarshalNUUID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "role":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
+			it.Role, err = ec.unmarshalNRoleCategory2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐRoleCategory(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
 
 // endregion **************************** input.gotpl *****************************
 
@@ -3300,6 +3662,45 @@ func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, ob
 		case "_updated_at":
 
 			out.Values[i] = ec._Group__updated_at(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "setRoleToUserInGroup":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setRoleToUserInGroup(ctx, field)
+			})
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -3849,6 +4250,48 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var setRoleResultImplementors = []string{"setRoleResult"}
+
+func (ec *executionContext) _setRoleResult(ctx context.Context, sel ast.SelectionSet, obj *model.SetRoleResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, setRoleResultImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("setRoleResult")
+		case "user":
+
+			out.Values[i] = ec._setRoleResult_user(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "group":
+
+			out.Values[i] = ec._setRoleResult_group(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "role":
+
+			out.Values[i] = ec._setRoleResult_role(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
@@ -4255,6 +4698,25 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNsetRoleInput2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐSetRoleInput(ctx context.Context, v interface{}) (model.SetRoleInput, error) {
+	res, err := ec.unmarshalInputsetRoleInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNsetRoleResult2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐSetRoleResult(ctx context.Context, sel ast.SelectionSet, v model.SetRoleResult) graphql.Marshaler {
+	return ec._setRoleResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNsetRoleResult2ᚖgithubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐSetRoleResult(ctx context.Context, sel ast.SelectionSet, v *model.SetRoleResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._setRoleResult(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

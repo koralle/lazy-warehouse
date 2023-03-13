@@ -56,6 +56,18 @@ func (this User) GetID() string           { return this.ID }
 func (this User) GetCreatedAt() time.Time { return this.CreatedAt }
 func (this User) GetUpdatedAt() time.Time { return this.UpdatedAt }
 
+type SetRoleInput struct {
+	UserID  string       `json:"user_id"`
+	GroupID string       `json:"group_id"`
+	Role    RoleCategory `json:"role"`
+}
+
+type SetRoleResult struct {
+	User  *User        `json:"user"`
+	Group *Group       `json:"group"`
+	Role  RoleCategory `json:"role"`
+}
+
 type RoleCategory string
 
 const (
