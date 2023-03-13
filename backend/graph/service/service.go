@@ -26,11 +26,11 @@ type RoleService interface {
 }
 
 type GroupService interface {
-	Group(ctx context.Context, id string) (*model.Group, error)
+	Group(ctx context.Context, id model.UUID) (*model.Group, error)
 }
 
 type UserService interface {
-	User(ctx context.Context, id string) (*model.User, error)
+	User(ctx context.Context, id model.UUID) (*model.User, error)
 }
 
 type SetRoleService interface {

@@ -11,8 +11,8 @@ type groupService struct {
 	pool *pgxpool.Pool
 }
 
-func (r *groupService) Group(ctx context.Context, id string) (*model.Group, error) {
-	row := r.pool.QueryRow(ctx, `SELECT id, name, description FROM groups WHERE id = $1;`, id)
+func (r *groupService) Group(ctx context.Context, id model.UUID) (*model.Group, error) {
+	row := r.pool.QueryRow(ctx, `SELECT id, name, description FROM groups WHERE id = $1;`, id.UUID)
 
 	var group model.Group
 	if err := row.Scan(&group.ID, &group.Name, &group.Description); err != nil {

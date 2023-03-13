@@ -22,12 +22,12 @@ func (r *queryResolver) GetAllAvailableRoles(ctx context.Context) ([]*model.Role
 }
 
 // Group is the resolver for the group field.
-func (r *queryResolver) Group(ctx context.Context, id string) (*model.Group, error) {
+func (r *queryResolver) Group(ctx context.Context, id model.UUID) (*model.Group, error) {
 	return r.Srv.Group(ctx, id)
 }
 
 // Group is the resolver for the group field.
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+func (r *queryResolver) User(ctx context.Context, id model.UUID) (*model.User, error) {
 	return r.Srv.User(ctx, id)
 }
 

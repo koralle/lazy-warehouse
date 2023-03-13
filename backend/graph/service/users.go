@@ -11,8 +11,8 @@ type userService struct {
 	pool *pgxpool.Pool
 }
 
-func (r *userService) User(ctx context.Context, id string) (*model.User, error) {
-	row := r.pool.QueryRow(ctx, `SELECT id, name, email FROM users WHERE id = $1;`, id)
+func (r *userService) User(ctx context.Context, id model.UUID) (*model.User, error) {
+	row := r.pool.QueryRow(ctx, `SELECT id, name, email FROM users WHERE id = $1;`, id.UUID)
 
 	var user model.User
 	if err := row.Scan(&user.ID, &user.Name, &user.Email); err != nil {

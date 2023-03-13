@@ -60,8 +60,8 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetAllAvailableRoles func(childComplexity int) int
-		Group                func(childComplexity int, id string) int
-		User                 func(childComplexity int, id string) int
+		Group                func(childComplexity int, id model.UUID) int
+		User                 func(childComplexity int, id model.UUID) int
 	}
 
 	Role struct {
@@ -92,8 +92,8 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	GetAllAvailableRoles(ctx context.Context) ([]*model.Role, error)
-	Group(ctx context.Context, id string) (*model.Group, error)
-	User(ctx context.Context, id string) (*model.User, error)
+	Group(ctx context.Context, id model.UUID) (*model.Group, error)
+	User(ctx context.Context, id model.UUID) (*model.User, error)
 }
 
 type executableSchema struct {
@@ -182,7 +182,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Group(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.Group(childComplexity, args["id"].(model.UUID)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -194,7 +194,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.User(childComplexity, args["id"].(model.UUID)), true
 
 	case "Role._created_at":
 		if e.complexity.Role.CreatedAt == nil {
@@ -461,10 +461,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_group_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 model.UUID
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		arg0, err = ec.unmarshalNUUID2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUUID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -476,10 +476,10 @@ func (ec *executionContext) field_Query_group_args(ctx context.Context, rawArgs 
 func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 model.UUID
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		arg0, err = ec.unmarshalNUUID2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUUID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -552,9 +552,9 @@ func (ec *executionContext) _Group_id(ctx context.Context, field graphql.Collect
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(model.UUID)
 	fc.Result = res
-	return ec.marshalNUUID2string(ctx, field.Selections, res)
+	return ec.marshalNUUID2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Group_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -915,7 +915,7 @@ func (ec *executionContext) _Query_group(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Group(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().Group(rctx, fc.Args["id"].(model.UUID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -984,7 +984,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().User(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().User(rctx, fc.Args["id"].(model.UUID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1194,9 +1194,9 @@ func (ec *executionContext) _Role_id(ctx context.Context, field graphql.Collecte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(model.UUID)
 	fc.Result = res
-	return ec.marshalNUUID2string(ctx, field.Selections, res)
+	return ec.marshalNUUID2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Role_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1370,9 +1370,9 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(model.UUID)
 	fc.Result = res
-	return ec.marshalNUUID2string(ctx, field.Selections, res)
+	return ec.marshalNUUID2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3556,7 +3556,7 @@ func (ec *executionContext) unmarshalInputsetRoleInput(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
-			it.UserID, err = ec.unmarshalNUUID2string(ctx, v)
+			it.UserID, err = ec.unmarshalNUUID2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUUID(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3564,7 +3564,7 @@ func (ec *executionContext) unmarshalInputsetRoleInput(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("group_id"))
-			it.GroupID, err = ec.unmarshalNUUID2string(ctx, v)
+			it.GroupID, err = ec.unmarshalNUUID2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUUID(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4418,19 +4418,14 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUUID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalString(v)
+func (ec *executionContext) unmarshalNUUID2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUUID(ctx context.Context, v interface{}) (model.UUID, error) {
+	var res model.UUID
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUUID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
+func (ec *executionContext) marshalNUUID2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUUID(ctx context.Context, sel ast.SelectionSet, v model.UUID) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋkoralleᚋlazyᚑwarehouseᚋbackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
