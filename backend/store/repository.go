@@ -2,16 +2,16 @@ package store
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/koralle/lazy-warehouse/backend/config"
-	_ "github.com/lib/pq"
 )
 
-func New(ctx context.Context, cfg *config.Config) (*sql.DB, func(), error) {
+func New(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, func(), error) {
+
 	dsn := fmt.Sprintf(
 		"host=%s port=%d user=%s "+
 			"password=%s dbname=%s sslmode=%s search_path=%s",
@@ -22,7 +22,7 @@ func New(ctx context.Context, cfg *config.Config) (*sql.DB, func(), error) {
 		cfg.SearchPath,
 	)
 	log.Println(dsn)
-	db, err := sql.Open("postgres", dsn)
+	dbpool, err := pgxpool.New(ctx, dsn)
 
 	if err != nil {
 		return nil, nil, err
@@ -32,9 +32,5 @@ func New(ctx context.Context, cfg *config.Config) (*sql.DB, func(), error) {
 
 	defer cancel()
 
-	if err := db.PingContext(ctx); err != nil {
-		return nil, func() { _ = db.Close() }, err
-	}
-
-	return db, func() { _ = db.Close() }, nil
+	return dbpool, func() { dbpool.Close() }, nil
 }

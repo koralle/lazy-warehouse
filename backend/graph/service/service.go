@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"database/sql"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
 )
 
@@ -31,10 +31,10 @@ type UserService interface {
 	User(ctx context.Context, id string) (*model.User, error)
 }
 
-func New(db *sql.DB) Services {
+func New(pool *pgxpool.Pool) Services {
 	return &services{
-		roleService:  &roleService{db: db},
-		groupService: &groupService{db: db},
-		userService:  &userService{db: db},
+		roleService:  &roleService{pool: pool},
+		groupService: &groupService{pool: pool},
+		userService:  &userService{pool: pool},
 	}
 }

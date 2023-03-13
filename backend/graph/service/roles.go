@@ -2,19 +2,25 @@ package service
 
 import (
 	"context"
-	"database/sql"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
 )
 
 type roleService struct {
-	db *sql.DB
+	pool *pgxpool.Pool
 }
 
 func (r *roleService) GetAllAvailableRole(ctx context.Context) ([]*model.Role, error) {
-	rows, err := r.db.QueryContext(ctx, "SELECT id, name FROM lazy_warehouse.roles;")
+	rows, err := r.pool.Query(ctx, `SELECT id, name FROM lazy_warehouse.roles;`)
 
 	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
