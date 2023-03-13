@@ -11,6 +11,11 @@ import (
 	"github.com/koralle/lazy-warehouse/backend/internal"
 )
 
+// SetRoleToUserInGroup is the resolver for the setRoleToUserInGroup field.
+func (r *mutationResolver) SetRoleToUserInGroup(ctx context.Context, input model.SetRoleInput) (*model.SetRoleResult, error) {
+	return r.Srv.SetRoleToUserInGroup(ctx, input)
+}
+
 // GetAllAvailableRoles is the resolver for the getAllAvailableRoles field.
 func (r *queryResolver) GetAllAvailableRoles(ctx context.Context) ([]*model.Role, error) {
 	return r.Srv.GetAllAvailableRole(ctx)
@@ -26,7 +31,11 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 	return r.Srv.User(ctx, id)
 }
 
+// Mutation returns internal.MutationResolver implementation.
+func (r *Resolver) Mutation() internal.MutationResolver { return &mutationResolver{r} }
+
 // Query returns internal.QueryResolver implementation.
 func (r *Resolver) Query() internal.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
