@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/koralle/lazy-warehouse/backend/graph/model"
 )
@@ -33,12 +34,17 @@ func (s *setRoleService) SetRoleToUserInGroup(ctx context.Context, input model.S
 	upsertQuery := `
     INSERT INTO lazy_warehouse.administration 
       (id, user_id, group_id, role_id)
-    VALUES ('1', $1, $2, $3) 
+    VALUES ($1, $2, $3, $4) 
     ON CONFLICT ON CONSTRAINT user_and_group
-    DO UPDATE SET role_id=$3;
+    DO UPDATE SET role_id=$4;
   `
 
-	_, err = s.pool.Query(ctx, upsertQuery, user.ID, group.ID, role.ID)
+	u6, err := uuid.NewV6()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.pool.Query(ctx, upsertQuery, u6, user.ID, group.ID, role.ID)
 	if err != nil {
 		return nil, err
 	}
