@@ -22,10 +22,11 @@ func New(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, func(), error)
 		cfg.SearchPath,
 	)
 	log.Println(dsn)
+
 	dbpool, err := pgxpool.New(ctx, dsn)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, func() { dbpool.Close() }, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
